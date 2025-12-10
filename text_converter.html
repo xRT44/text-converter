@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>محول النصوص - مورس و ثنائي</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 10px 10px 0 0;
+            color: white;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .tab.active {
+            background: white;
+            color: #1e3c72;
+        }
+
+        .tab-content {
+            display: none;
+            background: white;
+            border-radius: 0 0 20px 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .converter-section {
+            margin-bottom: 30px;
+        }
+
+        .converter-section h2 {
+            color: #1e3c72;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+            text-align: center;
+            padding-bottom: 10px;
+            border-bottom: 3px solid #2a5298;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #495057;
+            font-weight: bold;
+            font-size: 1.1em;
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            font-size: 1.1em;
+            resize: vertical;
+            min-height: 120px;
+            font-family: 'Courier New', monospace;
+            transition: all 0.3s ease;
+        }
+
+        textarea:focus {
+            outline: none;
+            border-color: #2a5298;
+            box-shadow: 0 0 0 3px rgba(42, 82, 152, 0.1);
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        button {
+            flex: 1;
+            padding: 15px;
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(42, 82, 152, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+
+        .result-box {
+            background: #e7f3ff;
+            border-radius: 10px;
+            padding: 20px;
+            border-right: 4px solid #2a5298;
+            margin-top: 20px;
+        }
+
+        .result-label {
+            color: #495057;
+            font-weight: bold;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+
+        .result-value {
+            font-size: 1.2em;
+            color: #1e3c72;
+            font-family: 'Courier New', monospace;
+            word-break: break-all;
+            line-height: 1.6;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+        }
+
+        .info-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .info-box h3 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+
+        .info-box ul {
+            margin-right: 20px;
+            color: #856404;
+            line-height: 1.8;
+        }
+
+        .error {
+            background: #ffe7e7;
+            border-right-color: #dc3545;
+        }
+
+        .error .result-value {
+            color: #dc3545;
+        }
+
+        .copy-btn {
+            background: #28a745;
+            padding: 10px 20px;
+            margin-top: 10px;
+            width: auto;
+            font-size: 0.9em;
+        }
+
+        .copy-btn:hover {
+            background: #218838;
+        }
+
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 1.8em;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab-content {
+                padding: 20px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔤 محول النصوص المتقدم</h1>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(event, 'morse')">شفرة مورس</button>
+            <button class="tab" onclick="switchTab(event, 'binary')">النظام الثنائي</button>
+        </div>
+
+        <!-- تبويب شفرة مورس -->
+        <div id="morse" class="tab-content active">
+            <div class="converter-section">
+                <h2>🔊 محول شفرة مورس</h2>
+                
+                <div class="input-group">
+                    <label for="textToMorse">النص العادي:</label>
+                    <textarea id="textToMorse" placeholder="اكتب النص هنا (إنجليزي أو أرقام)"></textarea>
+                </div>
+                <div class="button-group">
+                    <button onclick="convertTextToMorse()">تحويل إلى مورس ← ···</button>
+                    <button class="secondary" onclick="clearMorse()">مسح</button>
+                </div>
+                <div id="morseResult" class="result-box" style="display: none;">
+                    <div class="result-label">شفرة مورس:</div>
+                    <div class="result-value" id="morseValue"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('morseValue')">📋 نسخ</button>
+                </div>
+
+                <div style="margin: 40px 0; border-top: 2px dashed #dee2e6;"></div>
+
+                <div class="input-group">
+                    <label for="morseToText">شفرة مورس:</label>
+                    <textarea id="morseToText" placeholder="اكتب شفرة مورس هنا (. و -)"></textarea>
+                </div>
+                <div class="button-group">
+                    <button onclick="convertMorseToText()">تحويل إلى نص → ABC</button>
+                    <button class="secondary" onclick="clearMorseToText()">مسح</button>
+                </div>
+                <div id="textResult" class="result-box" style="display: none;">
+                    <div class="result-label">النص المفكوك:</div>
+                    <div class="result-value" id="textValue"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('textValue')">📋 نسخ</button>
+                </div>
+
+                <div class="info-box">
+                    <h3>ℹ️ معلومات عن شفرة مورس:</h3>
+                    <ul>
+                        <li>النقطة (.) تمثل إشارة قصيرة</li>
+                        <li>الشرطة (-) تمثل إشارة طويلة</li>
+                        <li>المسافة بين الحروف تمثل بفراغ</li>
+                        <li>المسافة بين الكلمات تمثل بعدة فراغات</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- تبويب النظام الثنائي -->
+        <div id="binary" class="tab-content">
+            <div class="converter-section">
+                <h2>💾 محول النظام الثنائي</h2>
+                
+                <div class="input-group">
+                    <label for="textToBinary">النص العادي:</label>
+                    <textarea id="textToBinary" placeholder="اكتب النص هنا (أي لغة)"></textarea>
+                </div>
+                <div class="button-group">
+                    <button onclick="convertTextToBinary()">تحويل إلى ثنائي → 01001</button>
+                    <button class="secondary" onclick="clearBinary()">مسح</button>
+                </div>
+                <div id="binaryResult" class="result-box" style="display: none;">
+                    <div class="result-label">النظام الثنائي:</div>
+                    <div class="result-value" id="binaryValue"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('binaryValue')">📋 نسخ</button>
+                </div>
+
+                <div style="margin: 40px 0; border-top: 2px dashed #dee2e6;"></div>
+
+                <div class="input-group">
+                    <label for="binaryToText">النظام الثنائي:</label>
+                    <textarea id="binaryToText" placeholder="اكتب الأرقام الثنائية هنا (0 و 1)"></textarea>
+                </div>
+                <div class="button-group">
+                    <button onclick="convertBinaryToText()">تحويل إلى نص → ABC</button>
+                    <button class="secondary" onclick="clearBinaryToText()">مسح</button>
+                </div>
+                <div id="textFromBinaryResult" class="result-box" style="display: none;">
+                    <div class="result-label">النص المفكوك:</div>
+                    <div class="result-value" id="textFromBinaryValue"></div>
+                    <button class="copy-btn" onclick="copyToClipboard('textFromBinaryValue')">📋 نسخ</button>
+                </div>
+
+                <div class="info-box">
+                    <h3>ℹ️ معلومات عن النظام الثنائي:</h3>
+                    <ul>
+                        <li>كل حرف يتم تحويله إلى 8 بت (0 و 1)</li>
+                        <li>يدعم جميع اللغات بما فيها العربية</li>
+                        <li>يستخدم ترميز UTF-8</li>
+                        <li>كل 8 أرقام تمثل حرف واحد</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // قاموس شفرة مورس
+        const morseCode = {
+            'A': '.-', 'B': '-...', 'C': '-.-.', 'D': '-..', 'E': '.', 'F': '..-.',
+            'G': '--.', 'H': '....', 'I': '..', 'J': '.---', 'K': '-.-', 'L': '.-..',
+            'M': '--', 'N': '-.', 'O': '---', 'P': '.--.', 'Q': '--.-', 'R': '.-.',
+            'S': '...', 'T': '-', 'U': '..-', 'V': '...-', 'W': '.--', 'X': '-..-',
+            'Y': '-.--', 'Z': '--..', '0': '-----', '1': '.----', '2': '..---',
+            '3': '...--', '4': '....-', '5': '.....', '6': '-....', '7': '--...',
+            '8': '---..', '9': '----.', ' ': '/'
+        };
+
+        // عكس القاموس لفك التشفير
+        const reverseMorseCode = Object.fromEntries(
+            Object.entries(morseCode).map(([k, v]) => [v, k])
+        );
+
+        // التبديل بين التبويبات
+        function switchTab(event, tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // تحويل النص إلى مورس
+        function convertTextToMorse() {
+            const input = document.getElementById('textToMorse').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('morseResult');
+            const valueDiv = document.getElementById('morseValue');
+
+            if (input === '') {
+                showError(resultDiv, valueDiv, 'الرجاء إدخال نص للتحويل');
+                return;
+            }
+
+            let morse = '';
+            for (let char of input) {
+                if (morseCode[char]) {
+                    morse += morseCode[char] + ' ';
+                } else if (char === ' ') {
+                    morse += ' / ';
+                }
+            }
+
+            showSuccess(resultDiv, valueDiv, morse.trim());
+        }
+
+        // تحويل مورس إلى نص
+        function convertMorseToText() {
+            const input = document.getElementById('morseToText').value.trim();
+            const resultDiv = document.getElementById('textResult');
+            const valueDiv = document.getElementById('textValue');
+
+            if (input === '') {
+                showError(resultDiv, valueDiv, 'الرجاء إدخال شفرة مورس');
+                return;
+            }
+
+            try {
+                const words = input.split(' / ');
+                let text = '';
+
+                for (let word of words) {
+                    const letters = word.trim().split(' ');
+                    for (let morse of letters) {
+                        if (morse && reverseMorseCode[morse]) {
+                            text += reverseMorseCode[morse];
+                        }
+                    }
+                    text += ' ';
+                }
+
+                showSuccess(resultDiv, valueDiv, text.trim());
+            } catch (error) {
+                showError(resultDiv, valueDiv, 'خطأ في تحليل شفرة مورس');
+            }
+        }
+
+        // تحويل النص إلى ثنائي
+        function convertTextToBinary() {
+            const input = document.getElementById('textToBinary').value.trim();
+            const resultDiv = document.getElementById('binaryResult');
+            const valueDiv = document.getElementById('binaryValue');
+
+            if (input === '') {
+                showError(resultDiv, valueDiv, 'الرجاء إدخال نص للتحويل');
+                return;
+            }
+
+            let binary = '';
+            for (let i = 0; i < input.length; i++) {
+                const charCode = input.charCodeAt(i);
+                const bin = charCode.toString(2).padStart(8, '0');
+                binary += bin + ' ';
+            }
+
+            showSuccess(resultDiv, valueDiv, binary.trim());
+        }
+
+        // تحويل ثنائي إلى نص
+        function convertBinaryToText() {
+            const input = document.getElementById('binaryToText').value.trim();
+            const resultDiv = document.getElementById('textFromBinaryResult');
+            const valueDiv = document.getElementById('textFromBinaryValue');
+
+            if (input === '') {
+                showError(resultDiv, valueDiv, 'الرجاء إدخال أرقام ثنائية');
+                return;
+            }
+
+            // التحقق من أن الإدخال يحتوي على 0 و 1 فقط
+            if (!/^[01\s]+$/.test(input)) {
+                showError(resultDiv, valueDiv, 'الأرقام الثنائية يجب أن تحتوي على 0 و 1 فقط');
+                return;
+            }
+
+            try {
+                const binaryArray = input.split(' ');
+                let text = '';
+
+                for (let binary of binaryArray) {
+                    if (binary) {
+                        const decimal = parseInt(binary, 2);
+                        text += String.fromCharCode(decimal);
+                    }
+                }
+
+                showSuccess(resultDiv, valueDiv, text);
+            } catch (error) {
+                showError(resultDiv, valueDiv, 'خطأ في تحليل الأرقام الثنائية');
+            }
+        }
+
+        // دوال المسح
+        function clearMorse() {
+            document.getElementById('textToMorse').value = '';
+            document.getElementById('morseResult').style.display = 'none';
+        }
+
+        function clearMorseToText() {
+            document.getElementById('morseToText').value = '';
+            document.getElementById('textResult').style.display = 'none';
+        }
+
+        function clearBinary() {
+            document.getElementById('textToBinary').value = '';
+            document.getElementById('binaryResult').style.display = 'none';
+        }
+
+        function clearBinaryToText() {
+            document.getElementById('binaryToText').value = '';
+            document.getElementById('textFromBinaryResult').style.display = 'none';
+        }
+
+        // دوال العرض
+        function showError(resultDiv, valueDiv, message) {
+            resultDiv.style.display = 'block';
+            resultDiv.classList.add('error');
+            valueDiv.textContent = message;
+        }
+
+        function showSuccess(resultDiv, valueDiv, value) {
+            resultDiv.style.display = 'block';
+            resultDiv.classList.remove('error');
+            valueDiv.textContent = value;
+        }
+
+        // نسخ إلى الحافظة
+        function copyToClipboard(elementId) {
+            const text = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                alert('تم النسخ إلى الحافظة! ✓');
+            }).catch(err => {
+                alert('فشل النسخ');
+            });
+        }
+
+        // دعم Enter في حقول الإدخال
+        document.getElementById('textToMorse').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                convertTextToMorse();
+            }
+        });
+
+        document.getElementById('morseToText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                convertMorseToText();
+            }
+        });
+
+        document.getElementById('textToBinary').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                convertTextToBinary();
+            }
+        });
+
+        document.getElementById('binaryToText').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                convertBinaryToText();
+            }
+        });
+    </script>
+</body>
+</html>
